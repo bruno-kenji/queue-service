@@ -22,8 +22,8 @@ export default (app: Router) => {
       logger.debug('Calling Produce endpoint with body: %o', req.body);
       try {
         const queueService = Container.get(QueueService);
-        const { messages } = await queueService.ProduceMessages(req.body as MessagesDTO);
-        return res.status(201).json({ messages });
+        const { publishedMessageIDs } = await queueService.ProduceMessages(req.body as MessagesDTO);
+        return res.status(201).json({ publishedMessageIDs });
       } catch (e) {
         logger.error('🔥 error: %o', e);
         return next(e);
@@ -31,8 +31,23 @@ export default (app: Router) => {
     },
   );
 
-  route.get('/', (_req: Request, res: Response, next: NextFunction) => {
+  route.post('/consume', async (_req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get<winston.Logger>('logger');
+    logger.debug('Calling Consume endpoint');
+    try {
+      const queueService = Container.get(QueueService);
+      const { failedMessageIDs } = await queueService.ConsumeMessages();
+      logger.info('failed message ids: %o', failedMessageIDs);
+      return res.status(201).json({ failedMessageIDs });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+  });
+
+  route.get('/', async (_req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get<winston.Logger>('logger');
+    logger.debug('Calling Get endpoint');
     try {
       const queueService = Container.get(QueueService);
       const messages = queueService.GetMessages();

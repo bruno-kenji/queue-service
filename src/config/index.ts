@@ -29,4 +29,12 @@ export default {
   api: {
     prefix: '/api',
   },
+
+  /**
+   * Consumer configs
+   * a message needs to be processed within the timeout value, in miliseconds
+   */
+  consumer: {
+    timeout: parseInt(process.env.TIMEOUT || '250', 10),
+  },
 };

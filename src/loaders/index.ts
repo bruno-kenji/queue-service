@@ -2,6 +2,7 @@ import expressLoader from './express';
 import dependencyInjectorLoader from './dependencyInjector';
 import Logger from './logger';
 import queue from './queue';
+import processingQueue from './processingQueue';
 
 export default async ({ expressApp }) => {
   const messageModel = {
@@ -13,10 +14,9 @@ export default async ({ expressApp }) => {
   // It returns the agenda instance because it's needed in the subsequent loaders
   await dependencyInjectorLoader({
     queue,
+    processingQueue,
     models: [
       messageModel,
-      // salaryModel,
-      // whateverModel
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');

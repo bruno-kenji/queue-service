@@ -1,8 +1,12 @@
 import { Container } from 'typedi';
 import LoggerInstance from './logger';
-import config from '../config';
+import Message from '../models/message';
 
-export default ({ queue, models }: { queue; models: { name: string; model: any }[] }) => {
+export default ({ queue, processingQueue, models }: {
+  queue: Message[];
+  processingQueue: Message[];
+  models: { name: string; model: any }[]
+}) => {
   try {
     models.forEach(m => {
       Container.set(m.name, m.model);

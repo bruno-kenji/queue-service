@@ -1,4 +1,4 @@
-interface MessageDTO {
+export interface MessageDTO {
   message: string;
 };
 

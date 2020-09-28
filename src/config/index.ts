@@ -20,7 +20,7 @@ export default {
    * Used by winston logger
    */
   logs: {
-    level: process.env.LOG_LEVEL || 'silly',
+    level: process.env.LOG_LEVEL || 'debug',
   },
 
   /**

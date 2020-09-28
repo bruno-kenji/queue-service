@@ -37,7 +37,6 @@ export default (app: Router) => {
     try {
       const queueService = Container.get(QueueService);
       const { failedMessageIDs } = await queueService.ConsumeMessages();
-      logger.info('failed message ids: %o', failedMessageIDs);
       return res.status(201).json({ failedMessageIDs });
     } catch (e) {
       logger.error('🔥 error: %o', e);

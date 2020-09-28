@@ -11,54 +11,71 @@ export default class QueueService {
     @Inject('logger') private logger,
   ) { }
 
-  private async PublishMessage(message: Message) {
+  private async ProduceMessage(message: Message): Promise<void> {
     this.queue.push(message);
   };
 
   public async ProduceMessages(messages: MessagesDTO) {
     const publishedMessageIDs = messages.map((message) => {
       const messageObj = new Message(message);
-      this.PublishMessage(messageObj);
+      this.ProduceMessage(messageObj);
       return messageObj.id;
     });
     this.logger.debug('Messages published! Total messages in Queue: %i', this.queue.length);
     return { publishedMessageIDs };
   };
 
-  private async ConsumeMessage(message: Message) {
-    this.logger.info('Finished processing message %s', message.id);
+  /*
+    Process message takes a random time between 0 and 500 miliseconds.
+    If it takes longer than the configured timeout, it throws an error.
+  */
+  private async ProcessMessage(message: Message): Promise<void> {
+    this.logger.debug('Consuming message: %s', message.body);
 
-    // const consumeMessage = timeoutPromise(resolve => resolve(() => {
-    //   this.logger.info('Finished processing message %s', message.id);
-    // }), Math.random() * 500);
+    const processMessage: Function = timeoutPromise(resolve => resolve(() => {
+      this.logger.info('🚀 Finished processing message %s', message.id);
+    }), Math.random() * 500);
 
-    // const onTimeout = timeoutPromise(resolve => resolve(() => {
-    //   throw 'Timeout';
-    // }), config.consumer.timeout);
+    const onTimeout: Function = timeoutPromise(resolve => resolve(() => {
+      throw 'Timeout';
+    }), config.consumer.timeout);
 
-    // return Promise.race([consumeMessage, onTimeout].map(f => f())).then(result => result());
+    return Promise.race([processMessage, onTimeout].map(f => f()))
+      .then(resolve => resolve())
+      .catch(e => { throw e });
+  };
+
+  /*
+    Removes the first message from the queue and process it.
+    If it fails, pushes the message back to the queue and returns the message ID.
+    If it succeeds, does nothing and returns null.
+  */
+  public async ConsumeMessage(message: Message): Promise<Message['id']> {
+    this.queue.splice(0, 1);
+    try {
+      await this.ProcessMessage(message);
+    } catch (e) {
+      this.logger.error(
+        `❌ Consumer failed to read message. Adding message
+          ${message.id} back to the queue. Reason: ${e}.`
+      );
+      this.queue.push(message);
+      return message.id;
+    }
   };
 
   public async ConsumeMessages() {
-    const failedMessageIDs = [];
+    const queue = [...this.queue];
+    const consumedMessages = await Promise.all(queue.map(async (message) =>
+      await this.ConsumeMessage(message)));
 
-    await Promise.all(this.queue.map(async (message, index) => {
-      this.queue.splice(index, 1);
-      this.logger.debug('Reading message: %s', message.body);
-      this.logger.debug('queue is now this length: %i', this.queue.length);
-      try {
-        await this.ConsumeMessage(message);
-      } catch (e) {
-        this.logger.error("Consumer failed to read message. Adding message %s back to the queue. Reason: %o", message.id, e);
-        this.queue.push(message);
-        failedMessageIDs.push(message);
-      }
-    }));
+    this.logger.debug('Messages consumed! Remaining messages in Queue: %i', this.queue.length);
 
+    const failedMessageIDs = consumedMessages.filter(message => message);
     return { failedMessageIDs };
   };
 
-  public GetMessages() {
+  public GetMessages(): Message[] {
     return this.queue;
   };
-}
+};

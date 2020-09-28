@@ -1,4 +1,4 @@
-import { Service, Inject, Container } from 'typedi';
+import { Service, Inject } from 'typedi';
 import Message from '../models/message';
 import MessagesDTO from '../models/messagesDTO';
 import timeoutPromise from '../utils/timeoutPromise';
@@ -50,7 +50,7 @@ export default class QueueService {
     If it fails, pushes the message back to the queue and returns the message ID.
     If it succeeds, does nothing and returns null.
   */
-  public async ConsumeMessage(message: Message): Promise<Message['id']> {
+  private async ConsumeMessage(message: Message): Promise<Message['id']> {
     this.queue.splice(0, 1);
     try {
       await this.ProcessMessage(message);

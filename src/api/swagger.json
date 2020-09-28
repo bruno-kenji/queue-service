@@ -1,0 +1,170 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a queue service API with Produce and Consume endpoints. Note that this API is not suited for real life applications.",
+    "version": "1.0.0",
+    "title": "Queue Service",
+    "contact": {
+      "email": "brunokenjidev@gmail.com"
+    },
+    "license": {
+      "name": "WTFPL License",
+      "url": "http://www.wtfpl.net/"
+    }
+  },
+  "host": "localhost:9898",
+  "basePath": "/api/v1",
+  "tags": [
+    {
+      "name": "Messages",
+      "description": "All endpoints to Consume and Produce messages"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/messages/produce": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Produces a list of messages into the queue",
+        "description": "",
+        "operationId": "produceMessages",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "messages",
+            "description": "A list of messages",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "example": "Here is a cool message"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "publishedMessagesIDs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "17bece9d-48be-4369-b390-4945569b37af"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/consume": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Consumes all available messages from the queue",
+        "description": "Read and delete all messages from the queue. Messages that fail to process are pushed back into the queue.",
+        "operationId": "consumeMessages",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "failedMessageIDs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "17bece9d-48be-4369-b390-4945569b37af"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Lists all available messages in the queue",
+        "description": "Lists all messages in the queue. It doesn't consume any message. Use for debugging purposes.",
+        "operationId": "getMessages",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "17bece9d-48be-4369-b390-4945569b37af"
+                      },
+                      "body": {
+                        "type": "string",
+                        "example": "Here is a cool message"
+                      },
+                      "timestamp": {
+                        "type": "integer",
+                        "example": 1601244761405
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ApiResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

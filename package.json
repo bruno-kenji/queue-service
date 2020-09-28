@@ -45,6 +45,7 @@
     "moment-timezone": "^0.5.23",
     "morgan": "^1.9.1",
     "reflect-metadata": "^0.1.12",
+    "swagger-ui-express": "^4.1.4",
     "typedi": "^0.8.0",
     "winston": "^3.2.1"
   },

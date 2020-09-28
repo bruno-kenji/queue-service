@@ -1,4 +1,5 @@
 import { Service, Inject } from 'typedi';
+import { Logger } from 'winston';
 import Message from '../models/message';
 import MessagesDTO from '../models/messagesDTO';
 import timeoutPromise from '../utils/timeoutPromise';
@@ -8,7 +9,7 @@ import config from '../config';
 export default class QueueService {
   constructor(
     @Inject('queue') private queue: Message[],
-    @Inject('logger') private logger,
+    @Inject('logger') private logger: Logger,
   ) { }
 
   private async ProduceMessage(message: Message): Promise<void> {

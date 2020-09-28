@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-import winston from 'winston';
+import { Logger } from 'winston';
 import QueueService from '../../services/queue';
 import MessagesDTO from '../../models/messagesDTO';
 import { celebrate, Joi } from 'celebrate';
@@ -18,7 +18,7 @@ export default (app: Router) => {
       ),
     }),
     async (req: Request, res: Response, next: NextFunction) => {
-      const logger = Container.get<winston.Logger>('logger');
+      const logger = Container.get<Logger>('logger');
       logger.debug('📡 Calling Produce endpoint with body: %o', req.body);
       try {
         const queueService = Container.get(QueueService);
@@ -32,7 +32,7 @@ export default (app: Router) => {
   );
 
   route.post('/consume', async (_req: Request, res: Response, next: NextFunction) => {
-    const logger = Container.get<winston.Logger>('logger');
+    const logger = Container.get<Logger>('logger');
     logger.debug('📡 Calling Consume endpoint');
     try {
       const queueService = Container.get(QueueService);
@@ -45,7 +45,7 @@ export default (app: Router) => {
   });
 
   route.get('/', async (_req: Request, res: Response, next: NextFunction) => {
-    const logger = Container.get<winston.Logger>('logger');
+    const logger = Container.get<Logger>('logger');
     logger.debug('📡 Calling Get endpoint');
     try {
       const queueService = Container.get(QueueService);
